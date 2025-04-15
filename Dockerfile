@@ -1,13 +1,13 @@
-﻿FROM node:18
+﻿FROM apify/actor-node:18
 
-# Set working directory
-WORKDIR /usr/src/app
+# Copy package.json and package-lock.json first for better caching
+COPY package.json package-lock.json* ./
 
-# Copy package.json files and install dependencies
-COPY package*.json ./
-RUN npm install --omit=dev
+# Install dependencies
+RUN npm install --production
 
 # Copy the rest of the code
 COPY . ./
 
+# Run the scraper
 CMD ["npm", "start"]
