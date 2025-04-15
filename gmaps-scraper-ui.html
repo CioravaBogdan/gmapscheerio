@@ -182,8 +182,23 @@
             radiusValue.textContent = this.value;
         });
         
+        // Geocoding function
+        async function geocodeLocation(locationName) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationName)}`);
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    return [parseFloat(data[0].lon), parseFloat(data[0].lat)];
+                }
+                return [0, 0]; // Fallback
+            } catch (error) {
+                console.error("Geocoding failed:", error);
+                return [0, 0];
+            }
+        }
+        
         // Form submission
-        document.getElementById('scraperForm').addEventListener('submit', function(e) {
+        document.getElementById('scraperForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Show loading indicator
@@ -211,23 +226,11 @@
                 scrapePlaceDetailPage: true
             };
             
+            const coordinates = await geocodeLocation(location);
+            payload.customGeolocation.coordinates = coordinates;
+            
             console.log('Sending request with payload:', payload);
             
-            // REPLACE THIS ENTIRE BLOCK:
-            // setTimeout(() => {
-            //    document.getElementById('loading').style.display = 'none';
-            //    document.getElementById('results').style.display = 'block';
-            //    document.getElementById('resultsContent').innerHTML = `
-            //        <div class="alert alert-success">
-            //            <h4>Scraping job started successfully!</h4>
-            //            <p>Scraping ${keywords.join(', ')} in ${location} with a ${radius}km radius.</p>
-            //            <p>Your results will be available in the Apify dashboard once complete.</p>
-            //            <a href="https://console.apify.com/actors/tasks" class="btn btn-primary" target="_blank">Go to Apify Dashboard</a>
-            //        </div>
-            //    `;
-            // }, 2000);
-            
-            // WITH YOUR NEW CODE:
             fetch('https://api.apify.com/v2/acts/cioravageorge~google-maps-advanced-scraper/runs', {
                 method: 'POST',
                 headers: {

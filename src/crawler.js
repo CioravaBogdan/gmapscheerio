@@ -5,14 +5,33 @@ const ContactExtractor = require('./utils/extract-contact');
 const HtmlParser = require('./utils/html-parser');
 
 class Crawler {
-    constructor(options) {
-        this.options = options;
-        this.requestUtils = new RequestUtils(options.proxyConfig);
+    constructor(proxyConfig = {}) {
+        this.proxyConfig = proxyConfig;
+        this.userAgents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
+            // Add more user agents
+        ];
+        this.requestUtils = new RequestUtils(proxyConfig);
         this.contactExtractor = new ContactExtractor();
         this.htmlParser = new HtmlParser();
         this.requestQueue = new RequestQueue();
         this.costEstimator = options.costEstimator;
         this.placesScraped = 0;
+    }
+
+    getRandomUserAgent() {
+        return this.userAgents[Math.floor(Math.random() * this.userAgents.length)];
+    }
+
+    async makeRequest(url, options = {}) {
+        // ...
+        headers: {
+            'User-Agent': this.getRandomUserAgent(),
+            // ...
+        }
+        // ...
     }
 
     async run() {
@@ -34,7 +53,7 @@ class Crawler {
 
             try {
                 log.info(`Processing ${request.url}`);
-                const response = await this.requestUtils.makeRequest(request.url);
+                const response = await this.makeRequestWithDelay(request.url);
                 const $ = cheerio.load(response.data);
                 
                 // Extract place data
@@ -262,6 +281,27 @@ class Crawler {
         
         log.info(`Saved place data: ${placeData.name}`);
     }
+
+    async makeRequestWithDelay(url, options = {}) {
+        // Random delay between 2-5 seconds
+        const delay = 2000 + Math.random() * 3000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.requestUtils.makeRequest(url, options);
+    }
+
+    // Enhance in crawler.js
+async processWithRetry(url, maxRetries = 3) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const response = await this.requestUtils.makeRequest(url);
+            return response;
+        } catch (error) {
+            if (attempt === maxRetries) throw error;
+            log.warning(`Attempt ${attempt} failed, retrying in 5s...`);
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+    }
+}
 }
 
 module.exports = { Crawler };

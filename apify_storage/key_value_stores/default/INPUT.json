@@ -1,13 +1,22 @@
 ﻿{
-  "searchStringsArray": ["restaurants", "cafes"],
-  "searchLocation": "New York",
-  "maxCrawledPlacesPerSearch": 20,
-  "maxCrawledPlaces": 50,
+  "searchStringsArray": ["metal", "fabrica"],
+  "searchLocation": "bacau",
+  "customGeolocation": {
+    "type": "Point",
+    "coordinates": [26.9141349, 46.528744],
+    "radiusKm": 5
+  },
+  "maxCrawledPlacesPerSearch": 50,
+  "maxCrawledPlaces": 200,
   "scrapeContacts": true,
   "scrapePlaceDetailPage": true,
-  "maxImages": 3,
+  "skipClosedPlaces": false,
+  "maxImages": 5,
   "maxReviews": 5,
+  "language": "en",
   "proxyConfig": {
-    "useApifyProxy": false
-  }
+    "useApifyProxy": true,
+    "apifyProxyGroups": ["RESIDENTIAL"]
+  },
+  "maxCostPerRun": 0
 }

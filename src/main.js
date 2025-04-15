@@ -10,6 +10,7 @@ Actor.main(async () => {
     
     // Try to get input from Actor.getInput() first
     let input = await Actor.getInput();
+    log.info('Actor input received:', { input: JSON.stringify(input) });
     
     // If input is null, try to read from local file
     if (!input) {
@@ -64,10 +65,23 @@ Actor.main(async () => {
         proxyConfig = { useApifyProxy: false },
     } = input;
 
-    if (!startUrls.length && (!searchStringsArray.length || (!searchLocation && !customGeolocation))) {
+    log.info('Processed input parameters:',
+        { 
+            searchStringsArray, 
+            searchLocation,
+            hasCustomGeo: !!customGeolocation,
+            startUrlsCount: startUrls.length
+        }
+    );
+
+    // Validate input
+    if ((!startUrls || startUrls.length === 0) && 
+        ((!searchStringsArray || searchStringsArray.length === 0) || 
+         (!searchLocation && !customGeolocation))) {
         throw new Error('Either "startUrls", "searchStringsArray" with "searchLocation", or "customGeolocation" must be provided');
     }
 
+    // --- Rest of your code remains the same ---
     // --- Initialize Cost Estimator ---
     const costEstimator = new CostEstimator(maxCostPerRun);
 
