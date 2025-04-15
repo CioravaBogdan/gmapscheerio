@@ -1,4 +1,4 @@
-FROM node:14
+﻿FROM node:18
 
 # Set working directory
 WORKDIR /usr/src/app
@@ -10,5 +10,4 @@ RUN npm install --omit=dev
 # Copy the rest of the code
 COPY . ./
 
-# Command to run when the container starts
 CMD ["npm", "start"]

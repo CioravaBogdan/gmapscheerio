@@ -1,4 +1,5 @@
 ﻿{
+  "actorSpecification": 1,
   "name": "google-maps-advanced-scraper",
   "title": "Google Maps Advanced Scraper with Cheerio",
   "version": "0.1",
