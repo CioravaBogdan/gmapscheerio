@@ -1,5 +1,4 @@
-﻿// filepath: c:\scrapers\GMpas cheerio\src\main.js
-const { Actor, log } = require('apify');
+﻿const { Actor, log } = require('apify');
 const { Crawler } = require('./crawler');
 const CostEstimator = require('./utils/cost-estimator');
 const fs = require('fs');
@@ -16,10 +15,10 @@ Actor.main(async () => {
     if (!input) {
         try {
             const inputPath = path.join(process.env.APIFY_LOCAL_STORAGE_DIR || '', 
-                                      'key_value_stores', 
-                                      'default', 
-                                      'INPUT.json');
-            log.info(Trying to read input from );
+                              'key_value_stores', 
+                              'default', 
+                              'INPUT.json');
+            log.info(`Trying to read input from ${inputPath}`);
             
             if (fs.existsSync(inputPath)) {
                 const inputData = fs.readFileSync(inputPath, 'utf8');
@@ -27,7 +26,7 @@ Actor.main(async () => {
                 log.info('Successfully loaded input from local file');
             }
         } catch (error) {
-            log.error(Error reading local input file: An item with the specified name C:\scrapers\GMpas cheerio\apify_storage\key_value_stores\default already exists. Could not find a part of the path 'C:\scrapers\GMpas cheerio\apify_storage\key_value_stores\default\INPUT.json'. An item with the specified name C:\scrapers\GMpas cheerio\src\utils already exists. A parameter cannot be found that matches parameter name 'Chord'. A parameter cannot be found that matches parameter name 'Chord'. A parameter cannot be found that matches parameter name 'Chord'. A parameter cannot be found that matches parameter name 'Chord'.);
+            log.error(`Error reading local input file: ${error}`);
         }
     }
     
