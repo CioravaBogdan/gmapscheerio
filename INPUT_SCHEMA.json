@@ -1,0 +1,130 @@
+{
+  "title": "Google Maps Advanced Scraper Input",
+  "description": "Extract data from Google Maps for businesses, places and locations via API or UI.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "searchStringsArray": {
+      "title": "Search terms",
+      "type": "array",
+      "description": "List of search terms to use (will run multiple searches)",
+      "editor": "stringList",
+      "default": []
+    },
+    "searchLocation": {
+      "title": "Location name",
+      "type": "string",
+      "description": "Location to search in (e.g. 'New York', 'Paris', 'Tokyo')",
+      "editor": "textfield"
+    },
+    "customGeolocation": {
+      "title": "Custom geolocation",
+      "type": "object",
+      "description": "Define a specific area to search in using coordinates",
+      "editor": "json",
+      "default": {
+        "type": "Point",
+        "coordinates": [26.9141349, 46.528744],
+        "radiusKm": 5
+      }
+    },
+    "startUrls": {
+      "title": "Start URLs",
+      "type": "array",
+      "description": "Direct URLs to Google Maps places (skips search)",
+      "editor": "requestListSources",
+      "default": []
+    },
+    "maxCrawledPlacesPerSearch": {
+      "title": "Maximum places per search term",
+      "type": "integer",
+      "description": "Maximum number of places to extract per search keyword (0 = unlimited)",
+      "editor": "number",
+      "default": 50
+    },
+    "maxCrawledPlaces": {
+      "title": "Maximum places total",
+      "type": "integer",
+      "description": "Total maximum number of places to extract across all searches (0 = unlimited)",
+      "editor": "number",
+      "default": 200
+    },
+    "scrapePlaceDetailPage": {
+      "title": "Scrape Place Detail Page",
+      "type": "boolean",
+      "description": "If true, navigates to the place's detail page for more data (like reviews, images). If false, extracts only data visible on the search results page.",
+      "editor": "checkbox",
+      "default": true
+    },
+    "skipClosedPlaces": {
+      "title": "Skip Permanently Closed Places",
+      "type": "boolean",
+      "description": "If true, places marked as 'Permanently closed' will not be scraped.",
+      "editor": "checkbox",
+      "default": false
+    },
+    "scrapeContacts": {
+      "title": "Extract contact information from Website",
+      "type": "boolean",
+      "description": "Attempt to visit the place's website (if available) to find email and social media links. Increases cost and run time.",
+      "editor": "checkbox",
+      "default": true
+    },
+    "maxImages": {
+      "title": "Maximum images per place",
+      "type": "integer",
+      "description": "Maximum number of images to extract for each place. Use 0 to extract none.",
+      "default": 5,
+      "minimum": 0
+    },
+    "maxReviews": {
+      "title": "Maximum reviews per place",
+      "type": "integer",
+      "description": "Maximum number of reviews to extract for each place. Use 0 to extract none.",
+      "default": 5,
+      "minimum": 0
+    },
+    "language": {
+      "title": "Language",
+      "type": "string",
+      "description": "Language code for Google Maps interface",
+      "editor": "select",
+      "default": "en",
+      "enum": ["en", "ro", "fr", "de", "es", "it"],
+      "enumTitles": ["English", "Romanian", "French", "German", "Spanish", "Italian"]
+    },
+    "proxyConfig": {
+      "title": "Proxy Configuration",
+      "type": "object",
+      "description": "Settings for Apify proxy",
+      "editor": "json",
+      "default": {
+        "useApifyProxy": true,
+        "apifyProxyGroups": ["RESIDENTIAL"]
+      }
+    },
+    "costOptimizedMode": {
+      "title": "Cost-optimized mode",
+      "type": "boolean",
+      "description": "Enable to reduce costs: limits images/reviews to 1, disables contact extraction, uses shorter timeouts.",
+      "editor": "checkbox",
+      "default": false
+    },
+    "maxCostPerRun": {
+      "title": "Maximum cost per run (USD)",
+      "type": "integer",
+      "description": "Set maximum estimated budget in USD for this run (0 = unlimited). Stops scraping if exceeded.",
+      "editor": "number",
+      "default": 0,
+      "minimum": 0
+    },
+    "skipContactExtraction": {
+      "title": "Skip website contact extraction",
+      "type": "boolean",
+      "description": "Explicitly disable visiting websites for contact info, regardless of costOptimizedMode.",
+      "editor": "checkbox",
+      "default": false
+    }
+  },
+  "required": []
+}

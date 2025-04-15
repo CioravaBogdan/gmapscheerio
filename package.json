@@ -1,0 +1,19 @@
+{
+  "name": "google-maps-advanced-scraper",
+  "version": "0.1.0",
+  "description": "Advanced Google Maps scraper using Cheerio for web scraping",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "apify": "^3.4.0",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0",
+    "crawlee": "^3.13.2"
+  },
+  "type": "commonjs"
+}

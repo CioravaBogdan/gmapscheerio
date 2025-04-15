@@ -1,0 +1,13 @@
+﻿{
+  "searchStringsArray": ["restaurants", "cafes"],
+  "searchLocation": "New York",
+  "maxCrawledPlacesPerSearch": 20,
+  "maxCrawledPlaces": 50,
+  "scrapeContacts": true,
+  "scrapePlaceDetailPage": true,
+  "maxImages": 3,
+  "maxReviews": 5,
+  "proxyConfig": {
+    "useApifyProxy": false
+  }
+}
