@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps Advanced Scraper</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .scraper-container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #4285F4;
+            margin-bottom: 25px;
+        }
+        .form-label {
+            font-weight: 600;
+            margin-top: 15px;
+        }
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .tag {
+            background: #E8F0FE;
+            border: 1px solid #4285F4;
+            color: #4285F4;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .tag button {
+            background: none;
+            border: none;
+            color: #5f6368;
+            font-size: 16px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+            display: none;
+        }
+        #loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .btn-primary {
+            background-color: #4285F4;
+            border-color: #4285F4;
+        }
+        .btn-primary:hover {
+            background-color: #3367d6;
+            border-color: #3367d6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container scraper-container">
+        <h1>Google Maps Advanced Scraper</h1>
+        <p class="lead">Search for businesses on Google Maps with our advanced scraper</p>
+        
+        <form id="scraperForm">
+            <div class="mb-3">
+                <label for="location" class="form-label">Location</label>
+                <input type="text" class="form-control" id="location" placeholder="Enter location (e.g., New York, Paris)">
+            </div>
+            
+            <div class="mb-3">
+                <label for="keywordInput" class="form-label">Keywords</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="keywordInput" placeholder="Enter keywords and press Enter">
+                    <button class="btn btn-outline-secondary" type="button" id="addKeywordBtn">Add</button>
+                </div>
+                <div class="tag-container" id="keywordsContainer"></div>
+                <input type="hidden" id="keywordsHidden" name="searchStringsArray">
+            </div>
+            
+            <div class="mb-3">
+                <label for="customRadius" class="form-label">Search Radius (km): <span id="radiusValue">5</span></label>
+                <input type="range" class="form-range" min="1" max="50" value="5" id="customRadius">
+            </div>
+            
+            <div class="mb-3">
+                <label for="maxPlaces" class="form-label">Maximum Places to Scrape</label>
+                <input type="number" class="form-control" id="maxPlaces" value="20" min="1" max="500">
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="scrapeContacts" checked>
+                <label class="form-check-label" for="scrapeContacts">Extract Contact Information</label>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="skipClosed" checked>
+                <label class="form-check-label" for="skipClosed">Skip Permanently Closed Places</label>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">Start Scraping</button>
+            </div>
+        </form>
+        
+        <div id="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Scraping in progress... This may take a few minutes.</p>
+        </div>
+        
+        <div class="results" id="results">
+            <h3>Scraping Results</h3>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Keywords handling
+        let keywords = [];
+        
+        document.getElementById('addKeywordBtn').addEventListener('click', addKeyword);
+        document.getElementById('keywordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addKeyword();
+            }
+        });
+        
+        function addKeyword() {
+            const keywordInput = document.getElementById('keywordInput');
+            const keyword = keywordInput.value.trim();
+            
+            if (keyword && !keywords.includes(keyword)) {
+                keywords.push(keyword);
+                renderKeywords();
+                keywordInput.value = '';
+            }
+        }
+        
+        function removeKeyword(index) {
+            keywords.splice(index, 1);
+            renderKeywords();
+        }
+        
+        function renderKeywords() {
+            const container = document.getElementById('keywordsContainer');
+            container.innerHTML = '';
+            
+            keywords.forEach((keyword, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `${keyword} <button type="button" onclick="removeKeyword(${index})">×</button>`;
+                container.appendChild(tag);
+            });
+            
+            // Update hidden input
+            document.getElementById('keywordsHidden').value = JSON.stringify(keywords);
+        }
+        
+        // Radius slider
+        const radiusSlider = document.getElementById('customRadius');
+        const radiusValue = document.getElementById('radiusValue');
+        
+        radiusSlider.addEventListener('input', function() {
+            radiusValue.textContent = this.value;
+        });
+        
+        // Form submission
+        document.getElementById('scraperForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            
+            // Get form values
+            const location = document.getElementById('location').value;
+            const radius = parseInt(document.getElementById('customRadius').value);
+            const maxPlaces = parseInt(document.getElementById('maxPlaces').value);
+            const scrapeContacts = document.getElementById('scrapeContacts').checked;
+            const skipClosed = document.getElementById('skipClosed').checked;
+            
+            // Create API request payload
+            const payload = {
+                searchStringsArray: keywords,
+                searchLocation: location,
+                customGeolocation: {
+                    type: "Point",
+                    coordinates: [0, 0], // These would be populated with geocoding in a real implementation
+                    radiusKm: radius
+                },
+                maxCrawledPlaces: maxPlaces,
+                scrapeContacts: scrapeContacts,
+                skipClosedPlaces: skipClosed,
+                scrapePlaceDetailPage: true
+            };
+            
+            console.log('Sending request with payload:', payload);
+            
+            // REPLACE THIS ENTIRE BLOCK:
+            // setTimeout(() => {
+            //    document.getElementById('loading').style.display = 'none';
+            //    document.getElementById('results').style.display = 'block';
+            //    document.getElementById('resultsContent').innerHTML = `
+            //        <div class="alert alert-success">
+            //            <h4>Scraping job started successfully!</h4>
+            //            <p>Scraping ${keywords.join(', ')} in ${location} with a ${radius}km radius.</p>
+            //            <p>Your results will be available in the Apify dashboard once complete.</p>
+            //            <a href="https://console.apify.com/actors/tasks" class="btn btn-primary" target="_blank">Go to Apify Dashboard</a>
+            //        </div>
+            //    `;
+            // }, 2000);
+            
+            // WITH YOUR NEW CODE:
+            fetch('https://api.apify.com/v2/acts/cioravageorge~google-maps-advanced-scraper/runs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer apify_api_Hkt8dDcKvBfuTKnltwa0GplE3tiiI42WJqFp'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('resultsContent').innerHTML = `
+                    <div class="alert alert-success">
+                        <h4>Scraping job started successfully!</h4>
+                        <p>Run ID: ${data.data.id}</p>
+                        <p>Your results will be available in the Apify dashboard once complete.</p>
+                        <a href="https://console.apify.com/actors/tasks" class="btn btn-primary" target="_blank">Go to Apify Dashboard</a>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('resultsContent').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h4>Error starting scraping job</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
