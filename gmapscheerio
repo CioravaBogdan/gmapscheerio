@@ -1,0 +1,86 @@
+// filepath: d:\gmapscheerio\server.js
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
+
+const app = express();
+const port = 3000; // You can change the port if needed
+
+// Middleware to parse form data
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Serve the HTML file
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'gmaps-scraper-ui.html'));
+});
+
+// Handle the form submission
+app.post('/start-scrape', (req, res) => {
+    console.log('Received form data:', req.body);
+
+    // --- Prepare input data for the scraper ---
+    const inputData = {
+        searchStringsArray: req.body.searchStringsArray ? req.body.searchStringsArray.split(',') : [],
+        searchLocation: req.body.location || "",
+        // customGeolocation: {}, // Add logic if you implement custom geo in the UI
+        // startUrls: [], // Add logic if you implement start URLs in the UI
+        maxCrawledPlacesPerSearch: parseInt(req.body.maxPlacesPerSearch || '50', 10), // Assuming you add this field
+        maxCrawledPlaces: parseInt(req.body.maxPlaces || '200', 10),
+        scrapePlaceDetailPage: req.body.scrapePlaceDetailPage === 'on', // Checkbox value is 'on' when checked
+        skipClosedPlaces: req.body.skipClosedPlaces === 'on', // Assuming you add this checkbox
+        scrapeContacts: req.body.scrapeContacts === 'on',
+        maxImages: parseInt(req.body.maxImages || '5', 10), // Assuming you add this field
+        maxReviews: parseInt(req.body.maxReviews || '5', 10), // Assuming you add this field
+        language: req.body.language || 'en', // Assuming you add this field
+        proxyConfig: { // Default proxy settings for local run - adjust if needed
+            useApifyProxy: false
+        },
+        maxCostPerRun: 0 // Cost is not relevant for local runs like this
+    };
+
+    // --- Write data to INPUT.json ---
+    const inputFilePath = path.join(__dirname, 'apify_storage', 'key_value_stores', 'default', 'INPUT.json');
+    try {
+        // Ensure directory exists (optional, Apify SDK usually handles this)
+        fs.mkdirSync(path.dirname(inputFilePath), { recursive: true });
+        // Write the file
+        fs.writeFileSync(inputFilePath, JSON.stringify(inputData, null, 2));
+        console.log(`Input data written to ${inputFilePath}`);
+
+        // --- Execute the scraper script ---
+        console.log('Starting the scraper script (npm start)...');
+        const scraperProcess = exec('npm start', (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Scraper execution error: ${error}`);
+                return;
+            }
+            console.log(`Scraper stdout: ${stdout}`);
+            console.error(`Scraper stderr: ${stderr}`);
+        });
+
+        scraperProcess.on('exit', (code) => {
+            console.log(`Scraper process exited with code ${code}`);
+        });
+
+        // --- Respond to the browser ---
+        // Redirect back to the form or show a success message
+         res.send(`
+            <h1>Scraping Started!</h1>
+            <p>Check your terminal or console where you ran <code>node server.js</code> for progress.</p>
+            <p>Results will be saved in the <code>d:\\gmapscheerio\\apify_storage\\datasets\\default</code> directory.</p>
+            <a href="/">Go back to form</a>
+        `);
+
+    } catch (err) {
+        console.error('Error writing INPUT.json or starting scraper:', err);
+        res.status(500).send('Error processing request. Check server console.');
+    }
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
+    console.log('Open your browser and navigate to this address to use the UI.');
+});

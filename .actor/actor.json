@@ -1,8 +1,113 @@
-﻿{
-  "actorSpecification": 1,
-  "name": "google-maps-advanced-scraper",
-  "title": "Google Maps Advanced Scraper with Cheerio",
-  "version": "0.1",
-  "buildTag": "latest",
-  "dockerfile": "./Dockerfile"
+﻿Google Maps Advanced Scraper
+A powerful, customizable scraper for extracting business data from Google Maps using Cheerio for web scraping and the Apify platform for execution.
+
+📋 Overview
+This project provides a robust solution for extracting business information from Google Maps. It can be used for market research, lead generation, or data analysis. The scraper supports searching by keywords in specific locations or custom geographic coordinates.
+
+✨ Features
+Multiple Search Methods:
+
+Search by keywords and location name
+Use custom geographic coordinates with specified radius
+Provide direct Google Maps URLs to specific businesses
+Rich Data Extraction:
+
+Business name, category, address, phone number
+Operating hours and business status
+Ratings and reviews (configurable limit)
+Images (configurable limit)
+Website URL
+Advanced Capabilities:
+
+Extract contact information (emails, phone numbers) from business websites
+Extract social media profiles from business websites
+Skip permanently closed places (optional)
+Cost estimation and budget control
+Proxy rotation using Apify proxy
+User Interface:
+
+HTML UI for configuring and running the scraper
+API access for programmatic control
+🛠️ Technical Architecture
+The scraper is built with a modular architecture:
+
+main.js: Entry point that handles input processing and initializes the crawler
+crawler.js: Core scraping logic for Google Maps
+Utils:
+request-utils.js: Handles HTTP requests with proxy support
+extract-contact.js: Extracts contact information from websites
+html-parser.js: Parses HTML content using Cheerio
+cost-estimator.js: Tracks operation costs and enforces budget limits
+🚀 Installation
+Local Development
+# Clone the repository
+git clone [repository-url]
+
+# Install dependencies
+npm install
+
+# Run locally
+npm start
+
+Apify Platform Deployment
+Push the code to a Git repository
+Connect the repository to your Apify account
+Build the actor in the Apify console
+📝 Configuration Options
+The scraper accepts the following input parameters (defined in INPUT_SCHEMA.json):
+
+Parameter	Type	Description
+searchStringsArray	Array	List of search terms to use
+searchLocation	String	Location to search in (e.g., "New York")
+customGeolocation	Object	Define specific area using coordinates and radius
+startUrls	Array	Direct URLs to Google Maps places
+maxCrawledPlacesPerSearch	Number	Maximum places per search term
+maxCrawledPlaces	Number	Total maximum places to extract
+scrapePlaceDetailPage	Boolean	Whether to fetch detailed place pages
+skipClosedPlaces	Boolean	Whether to skip permanently closed businesses
+scrapeContacts	Boolean	Extract contact info from websites
+maxImages	Number	Maximum images to extract per place
+maxReviews	Number	Maximum reviews to extract per place
+language	String	Language code for Google Maps interface
+proxyConfig	Object	Proxy configuration for requests
+maxCostPerRun	Number	Maximum budget in USD (0 = unlimited)
+💰 Cost Estimation
+The scraper includes a cost estimation system based on the following rates:
+
+Base Place: $0.0005 per place
+Detail Page: $0.001 per page
+Website Visit: $0.002 per website
+Image: $0.0001 per image
+Review: $0.0001 per review
+You can set a maximum budget with maxCostPerRun to control expenses.
+
+🖥️ User Interface
+The project includes an HTML interface (gmaps-scraper-ui.html) that provides a user-friendly way to:
+
+Enter search keywords and location
+Set the search radius
+Configure maximum number of places to scrape
+Toggle contact extraction and closed business filtering
+Submit jobs to the Apify platform
+📊 Output Data
+The extracted data includes:
+
+Business name and category
+Address and geographic location
+Contact information (phone, website, email)
+Business hours and status (open/closed)
+Ratings and review count
+Reviews with reviewer name, rating, and text
+Images (URLs)
+Social media profiles
+🔒 Proxy Support
+The scraper supports using the Apify proxy to avoid rate limiting. Configure it through the proxyConfig parameter:
+
+"proxyConfig": {
+  "useApifyProxy": true,
+  "apifyProxyGroups": ["RESIDENTIAL"]
 }
+⚠️ Legal Disclaimer
+This scraper is provided for educational purposes only. Users are responsible for ensuring their use of this tool complies with Google's Terms of Service and applicable laws.
+
+📄 License

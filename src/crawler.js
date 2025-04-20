@@ -5,15 +5,16 @@ const ContactExtractor = require('./utils/extract-contact');
 const HtmlParser = require('./utils/html-parser');
 
 class Crawler {
-    constructor(proxyConfig = {}) {
-        this.proxyConfig = proxyConfig;
+    constructor(options = {}) {
+        this.options = options;
+        this.proxyConfig = options.proxyConfig || {};
         this.userAgents = [
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
             // Add more user agents
         ];
-        this.requestUtils = new RequestUtils(proxyConfig);
+        this.requestUtils = new RequestUtils(this.proxyConfig);
         this.contactExtractor = new ContactExtractor();
         this.htmlParser = new HtmlParser();
         this.requestQueue = new RequestQueue();
@@ -26,12 +27,11 @@ class Crawler {
     }
 
     async makeRequest(url, options = {}) {
-        // ...
-        headers: {
+        const headers = {
             'User-Agent': this.getRandomUserAgent(),
-            // ...
-        }
-        // ...
+            ...(options.headers || {}),
+        };
+        return this.requestUtils.makeRequest(url, { ...options, headers });
     }
 
     async run() {
